@@ -1,26 +1,23 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
------------------------------------------------------------------------------
--- |
+-----------------------------------------------------------
 -- Module      :  PrettierPrelude
 -- Copyright   :  (c) Matthew Marsland
--- License     :  BSD-style (see the file libraries/base/LICENSE)
+-- License     :  BSD-style
 --
 -- Maintainer  :  marslandm@me.com
--- Stability   :  work in progress
--- Portability :  portable
+-- Status      :  work in progress
 --
 -- The PrettierPrelude: A modification of Prelude specifically restricting Numeric classes,
 -- and altering type signatures accordingly.
---
------------------------------------------------------------------------------
+-----------------------------------------------------------
 
 module PrettierPrelude (
 
-    -- * Standard types, classes and related functions
+    -- # Standard types, classes and related functions
 
-    -- ** Basic data types
+    -- ## Basic data types
     Bool(False, True),
     (&&), (||), not, otherwise,
 
@@ -33,24 +30,24 @@ module PrettierPrelude (
     Ordering(LT, EQ, GT),
     Char, String,
 
-    -- *** Tuples
+    -- ### Tuples
     fst, snd, curry, uncurry,
 
-    -- ** Basic type classes
+    -- ## Basic type classes
     Eq((==), (/=)),
     Ord(compare, (<), (<=), (>=), (>), max, min),
     Enum(succ, pred, toEnum, fromEnum, enumFrom, enumFromThen,
          enumFromTo, enumFromThenTo),
     Bounded(minBound, maxBound),
 
-    -- ** Numbers
+    -- ## Numbers
 
-    -- *** Numeric types
+    -- ### Numeric types
     Integer, Float, Double, Rational,
     --Int, Integer, Float, Double,
     --Rational, Word,
 
-    -- *** Numeric type classes
+    -- ### Numeric type classes
     Num((+), (-), (*), negate, abs, signum, fromInteger),
     Real(toRational),
     Integral(quot, rem, div, mod, quotRem, divMod, toInteger),
@@ -62,22 +59,22 @@ module PrettierPrelude (
               encodeFloat, exponent, significand, scaleFloat, isNaN,
               isInfinite, isDenormalized, isIEEE, isNegativeZero, atan2),
 
-    -- *** Numeric functions
+    -- ### Numeric functions
     subtract, even, odd, gcd, lcm, (^), (^^),
     fromIntegral, realToFrac,
 
-    -- ** Semigroups and Monoids
+    -- ## Semigroups and Monoids
     Semigroup((<>)),
     Monoid(mempty, mappend, mconcat),
 
-    -- ** Monads and functors
+    -- ## Monads and functors
     Functor(fmap, (<$)), (<$>),
     Applicative(pure, (<*>), (*>), (<*)),
     Monad((>>=), (>>), return),
     MonadFail(fail),
     mapM_, sequence_, (=<<),
 
-    -- ** Folds and traversals
+    -- ## Folds and traversals
     Foldable(elem,      -- :: (Foldable t, Eq a) => a -> t a -> Bool
              -- fold,   -- :: Monoid m => t m -> m
              foldMap,   -- :: Monoid m => (a -> m) -> t a -> m
@@ -95,75 +92,78 @@ module PrettierPrelude (
 
     Traversable(traverse, sequenceA, mapM, sequence),
 
-    -- ** Miscellaneous functions
+    -- ## Miscellaneous functions
     id, const, (.), flip, ($), until,
     asTypeOf, error, errorWithoutStackTrace, undefined,
     seq, ($!),
 
-    -- * List operations
+    -- # List operations
     List.map, (List.++), List.filter,
     List.head, List.last, List.tail, List.init, (List.!!),
     Foldable.null, PrettierPrelude.length,
     List.reverse,
-    -- *** Special folds
+    -- ### Special folds
     Foldable.and, Foldable.or, Foldable.any, Foldable.all,
     Foldable.concat, Foldable.concatMap,
-    -- ** Building lists
-    -- *** Scans
+    -- ## Building lists
+    -- ### Scans
     List.scanl, List.scanl1, List.scanr, List.scanr1,
-    -- *** Infinite lists
+    -- ### Infinite lists
     List.iterate, List.repeat, List.replicate, List.cycle,
-    -- ** Sublists
+    -- ## Sublists
     List.take, List.drop,
     List.takeWhile, List.dropWhile,
     List.span, List.break,
     List.splitAt,
-    -- ** Searching lists
+    -- ## Searching lists
     Foldable.notElem,
     List.lookup,
-    -- ** Zipping and unzipping lists
+    -- ## Zipping and unzipping lists
     List.zip, List.zip3,
     List.zipWith, List.zipWith3,
     List.unzip, List.unzip3,
-    -- ** Functions on strings
+    -- ## Functions on strings
     List.lines, List.words, List.unlines, List.unwords,
 
-    -- * Converting to and from @String@
-    -- ** Converting to @String@
+    -- # Converting to and from @String@
+    -- ## Converting to @String@
     ShowS,
     Show(showsPrec, showList, show),
     shows,
     showChar, showString, showParen,
-    -- ** Converting from @String@
+    -- ## Converting from @String@
     ReadS,
     Read(readsPrec, readList),
     reads, readParen, read, lex,
 
-    -- * Basic Input and output
+    -- # Basic Input and output
     IO,
-    -- ** Simple I\/O operations
+    -- ## Simple I\/O operations
     -- All I/O functions defined here are character oriented.  The
     -- treatment of the newline character will vary on different systems.
     -- For example, two characters of input, return and linefeed, may
     -- read as a single newline character.  These functions cannot be
     -- used portably for binary I/O.
-    -- *** Output functions
+    -- ### Output functions
     putChar,
     putStr, putStrLn, print,
-    -- *** Input functions
+    -- ### Input functions
     getChar,
     getLine, getContents, interact,
-    -- *** Files
+    -- ### Files
     FilePath,
     readFile, writeFile, appendFile, readIO, readLn,
-    -- ** Exception handling in the I\/O monad
+    -- ## Exception handling in the I\/O monad
     IOError, ioError, userError,
+
+    -- # Generic Pretty-Printing
+    Generic, Out
 
   ) where
 
 import Control.Monad
 import Control.Monad.Fail
-import System.IO
+import System.IO        hiding (print)
 import System.IO.Error
 import qualified Data.List as List
 import Data.Either
@@ -183,6 +183,13 @@ import GHC.Real
 import GHC.Float
 import GHC.Show
 
--- ** Alternative definitions:
+import Text.PrettyPrint.GenericPretty
+import GHC.Generics
+
+-- ## Alternative definitions (INTEGER):
 length :: Foldable t => t a -> Integer
 length = fromIntegral . Foldable.length
+
+-- ## Alternative definitions (PRINTING):
+print           :: Out a => a -> IO ()
+print x         =  pp x
