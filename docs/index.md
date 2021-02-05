@@ -1,5 +1,6 @@
 # Edinburgh Prelude
-This is where students will be able to go to download and install the alternative Haskell Prelude for use by default.
+## NOTE
+This is where students will be able to go to download and install the alternative Haskell Prelude for use by default. It is a **skeleton** only and is not intended for use until this note is removed. - 5 Feb 2021
 
 ### Stack [Installation/Home](https://docs.haskellstack.org/en/stable/README/) (UNTESTED)
 
