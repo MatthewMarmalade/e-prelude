@@ -28,3 +28,10 @@ i1 = 1 :: Integer
 
 testToEnum :: Season
 testToEnum = toEnum 1
+
+naive_foldr :: (a -> b -> b) -> b -> [a] -> b
+naive_foldr f v [] = v
+naive_foldr f v (x:xs) = f x (naive_foldr f v xs)
+
+--copied_foldr :: (a -> b -> b) -> b -> [a] -> b
+--copied_foldr f v xs = foldr f v xs

@@ -78,7 +78,8 @@ module EPrelude (
     MonadFail(fail),
     mapM_, sequence_, (=<<),
 
-    -- ## Folds and traversals
+    {-
+    ---- ## Folds and traversals
     Foldable(elem,      -- :: (Foldable t, Eq a) => a -> t a -> Bool
              -- fold,   -- :: Monoid m => t m -> m
              foldMap,   -- :: Monoid m => (a -> m) -> t a -> m
@@ -93,6 +94,8 @@ module EPrelude (
              product,   -- :: (Foldable t, Num a) => t a -> a
              sum),      -- :: Num a => t a -> a
              -- toList) -- :: Foldable t => t a -> [a]
+    -}
+    elem, {-foldMap,-} foldr, foldl, foldr1, foldl1, maximum, minimum, product, sum,
 
     Traversable(traverse, sequenceA, mapM, sequence),
 
@@ -105,11 +108,12 @@ module EPrelude (
     List.map, (List.++), List.filter,
     --List.head, List.last, List.tail, List.init, (List.!!),
     List.head, List.last, List.tail, List.init, (!!),
-    Foldable.null, EPrelude.length,
+    {-Foldable.null,-} null, length,
     List.reverse,
     -- ### Special folds
-    Foldable.and, Foldable.or, Foldable.any, Foldable.all,
-    Foldable.concat, Foldable.concatMap,
+    {-Foldable.and, Foldable.or, Foldable.any, Foldable.all,
+    Foldable.concat, Foldable.concatMap,-}
+    and, or, any, all, concat, concatMap,
     -- ## Building lists
     -- ### Scans
     List.scanl, List.scanl1, List.scanr, List.scanr1,
@@ -124,7 +128,7 @@ module EPrelude (
     --List.splitAt,
     splitAt,
     -- ## Searching lists
-    Foldable.notElem,
+    {-Foldable.notElem,-} List.notElem,
     List.lookup,
     -- ## Zipping and unzipping lists
     List.zip, List.zip3,
@@ -179,8 +183,8 @@ import System.IO        hiding (print)
 import System.IO.Error
 import qualified Data.List as List
 import Data.Either
-import Data.Foldable    ( Foldable(..) )
-import qualified Data.Foldable as Foldable
+--import Data.Foldable    ( Foldable(..) )
+--import qualified Data.Foldable as Foldable
 import Data.Functor     ( (<$>) )
 import Data.Maybe
 import Data.Traversable ( Traversable(..) )
@@ -202,22 +206,21 @@ import GHC.Generics
 -- # Alternative definitions (INTEGER):
 
 -- ## LENGTH
---length :: Foldable t => t a -> Integer
---length = fromIntegral . Foldable.length
-
 length :: [a] -> Integer
 length [] = 0
-length (x:xs) = 1 + (EPrelude.length xs)
+length (x:xs) = 1 + (length xs)
+
+r_length :: [a] -> Integer
+r_length = fromIntegral . List.length
 
 -- ## TAKE
 take :: Integer -> [a] -> [a]
---take n xs = List.take (fromIntegral n) xs
-take = n_take
+take n [] = []
+take 0 (x:xs) = []
+take n (x:xs) = x : take (n-1) xs
 
-n_take :: Integer -> [a] -> [a]
-n_take n [] = []
-n_take 0 (x:xs) = []
-n_take n (x:xs) = x : n_take (n-1) xs
+r_take :: Integer -> [a] -> [a]
+r_take n xs = List.take (fromIntegral n) xs
 
 -- ## DROP
 drop :: Integer -> [a] -> [a]
@@ -290,6 +293,70 @@ showsPrec n = GHC.Show.showsPrec (fromIntegral n)
 -- ## READSPREC
 readsPrec :: Read a => Integer -> ReadS a
 readsPrec n = Text.Read.readsPrec (fromIntegral n)
+
+
+-- # Alternative definitions (FOLDABLE):
+elem :: Eq a => a -> [a] -> Bool
+elem _ [] = False
+elem k (x:xs)   | k == x = True
+                | otherwise = elem k xs
+
+notElem :: Eq a => a -> [a] -> Bool
+notElem x = not . elem x
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr _ v [] = v
+foldr f v xs = f (List.head xs) (foldr f v (List.tail xs))
+
+foldl :: (a -> b -> a) -> a -> [b] -> a
+foldl _ v [] = v
+foldl f v xs = f (foldl f v (List.init xs)) (List.last xs)
+
+foldr1 :: (a -> a -> a) -> [a] -> a
+foldr1 _ [] = errorWithoutStackTrace "EPrelude.foldr1: empty list"
+foldr1 _ [x] = x
+foldr1 f xs = f (List.head xs) (foldr1 f (List.tail xs))
+
+foldl1 :: (a -> a -> a) -> [a] -> a
+foldl1 _ [] = errorWithoutStackTrace "EPrelude.foldl1: empty list"
+foldl1 _ [x] = x
+foldl1 f xs = f (foldl1 f (List.init xs)) (List.last xs)
+
+maximum :: Ord a => [a] -> a
+maximum [] = errorWithoutStackTrace "EPrelude.minimum: empty list"
+maximum xs = foldr1 max xs
+
+minimum :: Ord a => [a] -> a
+minimum [] = errorWithoutStackTrace "EPrelude.minimum: empty list"
+minimum xs = foldr1 min xs
+
+product :: Num a => [a] -> a
+product xs = foldr (*) 1 xs
+
+sum :: Num a => [a] -> a
+sum xs = foldr (+) 0 xs
+
+and :: [Bool] -> Bool
+and = foldr (&&) True
+
+or :: [Bool] -> Bool
+or = foldr (||) False
+
+any :: (a -> Bool) -> [a] -> Bool
+any f xs = or (map f xs)
+
+all :: (a -> Bool) -> [a] -> Bool
+all f xs = and (map f xs)
+
+null :: [a] -> Bool
+null [] = True
+null xs = False
+
+concat :: [[a]] -> [a]
+concat = foldr (++) []
+
+concatMap :: (a -> [b]) -> [a] -> [b]
+concatMap f xs = concat (map f xs)
 
 -- # Alternative definitions (PRINTING):
 print           :: Out a => a -> IO ()
