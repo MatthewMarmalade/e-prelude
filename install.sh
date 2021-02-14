@@ -6,11 +6,11 @@ if [ `whoami` != root ]; then
   exit
 fi
 
-# EPrelude infocpation is located in /usr/local/var/eprelude
-echo Creating /usr/local/var/eprelude
-cp -r eprelude /usr/local/var
+# EPrelude information is located in /usr/local/share/eprelude
+echo Creating /usr/local/share/eprelude
+cp -r -p eprelude /usr/local/share
 
 echo Creating /usr/local/bin/ehci
-cp -r ehc/ehci /usr/local/bin
+cp -r -p ehc/ehci /usr/local/bin
 
 echo Install Complete.
