@@ -1,2 +1,0 @@
-#!/bin/sh
-ghci -ghci-script /usr/local/var/ehci/.ghci -XDeriveGeneric -XDeriveAnyClass -XNoImplicitPrelude -interactive-print=print $@
