@@ -1,2 +1,2 @@
 #!/bin/sh
-ghci -ghci-script /usr/local/share/eprelude/.ghci -i/usr/local/share/eprelude -XDeriveGeneric -XDeriveAnyClass -XNoImplicitPrelude -interactive-print=print $@
+ghci -ghci-script /usr/local/share/eprelude/.ghci -i/usr/local/share/eprelude -XDeriveGeneric -XDeriveAnyClass -XNoImplicitPrelude -interactive-print=print "$@"
