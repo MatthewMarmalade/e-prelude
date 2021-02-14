@@ -34,7 +34,7 @@ data Picture
  | FlipH Picture
  | FlipV Picture
  | Invert Picture
-   deriving (Show)
+   deriving (Show, Generic, Out)
 
 instance Eq Picture where
   (==) x y = let setX, setY :: Set Basic
