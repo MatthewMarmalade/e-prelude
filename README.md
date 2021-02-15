@@ -1,4 +1,4 @@
-# Edinburgh Prelude
+# E(dinburgh|ducational) Prelude
 An alternative Haskell Prelude that supports automatic pretty-printing through GenericPretty, improved numeric type safety and function signature intelligibility.
 Primarily an experiment to see what the potential performance and readability impacts are.
 
