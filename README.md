@@ -6,7 +6,7 @@ Primarily an experiment to see what the potential performance and readability im
 To improve the approachability and readability of Haskell code/data. New users can stumble over the `Foldable` type signatures of functions they only ever apply to lists, over the subtle difference between Int and Integer, over the unreadability of Node (Node (Leaf 1) (Node (Leaf 2) (Leaf 3))) (Leaf 4). This project attempts to analyze different alterations to the core Prelude library, imported by default in all Haskell programs, aimed at addressing these problems to make jumping into Haskell as easy as it can get.
 
 ## Installation
-Unfortunately only Unix installations are available for the moment. To install, download the repository above, unzip it, and run the installation script (requires sudo). Then, try it out by navigating to the `examples/tutorial1` folder and running `ehci Tutorial1`.
+Unfortunately only Unix installations are available for the moment. To install, download the repository above, unzip it, and run the installation script (requires sudo). Then, try it out by navigating to the `examples/tutorial1` folder and running `ehci Tutorial1`. Full instructions are present [here](https://matthewmarmalade.github.io/e-prelude-pages/).
 
 ## Usage
 Any Haskell project you would like to use EPrelude for requires an 'import EPrelude' statement at the top. From here, make sure you load the file with `ehci` instead of `ghci`. That's it!
