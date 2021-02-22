@@ -12,7 +12,7 @@ fi
 #echo Creating /usr/local/share/eprelude
 cp -r -p -i eprelude /usr/local/share
 
-#echo Creating /usr/local/bin/ehci
-cp -r -p -i ehc/ehci /usr/local/bin
+#echo Creating /usr/local/bin/edhci
+cp -r -p -i ehc/edhci /usr/local/bin
 
 echo Install Complete.

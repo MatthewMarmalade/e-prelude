@@ -20,6 +20,6 @@ rm -f -i /usr/local/share/eprelude/.ghci
 rm -f -i /usr/local/share/eprelude/EPrelude.hs
 #echo Deleting /usr/local/share/eprelude...
 rm -d -f -i /usr/local/share/eprelude
-#echo Deleting /usr/local/bin/ehci
-rm -f -i /usr/local/bin/ehci
+#echo Deleting /usr/local/bin/edhci
+rm -f -i /usr/local/bin/edhci
 echo Uninstall Complete.
