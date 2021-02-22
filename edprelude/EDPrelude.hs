@@ -36,14 +36,16 @@ module EDPrelude (
     --Equality and Booleans
     Eq((==),(/=)),
     Bool(True,False), 
-    otherwise, (||), (&&),
+    otherwise, (||), (&&), not,
 
     --Enum
     E.Enum,
     EDPrelude.toEnum, EDPrelude.fromEnum,
 
     --List Types and Functions
-    length, take, drop, sum, product, (!!), zip, zipWith, unzip, isPrefixOf, map, elem,
+    length, take, drop, sum, product, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),
+    repeat, replicate, head, tail, init, last, concat,
+    foldr, foldr1, foldl, foldl1,
     --Pair Functions
     fst, snd,
 
@@ -60,7 +62,14 @@ module EDPrelude (
     --Lifting and Monads
     Monad,
     (>>=), guard, return,
-    liftM, liftM2
+    liftM, liftM2,
+
+    --IO
+    IO,
+
+    --Pretty-Printing
+    Generic, Out,
+    pp, print
     ) where
 
 --IMPORTS
@@ -75,6 +84,9 @@ import GHC.Show
 import GHC.Types (Char, Bool(True,False), Double)
 import GHC.Base (String, error, errorWithoutStackTrace, ($), (.), undefined)
 import Control.Monad (Monad, liftM, liftM2, (>>=), guard, return)
+import System.IO (IO)
+import Text.PrettyPrint
+import Text.PrettyPrint.GenericPretty
 
 -- Num Functions
 
@@ -208,4 +220,58 @@ elem :: (Eq a) => a -> [a] -> Bool
 elem x [] = False
 elem x (y:ys) = x == y || elem x ys
 
+repeat :: a -> [a]
+repeat x = x : (repeat x)
+
+replicate :: Integer -> a -> [a]
+replicate n x = take n (repeat x)
+
+concat :: [[a]] -> [a]
+concat [] = []
+concat (xs:xss) = xs ++ concat xss
+
+head :: [a] -> a
+head [] = errorWithoutStackTrace "EDPrelude.head: empty list"
+head (x:xs) = x
+
+last :: [a] -> a
+last [] = errorWithoutStackTrace "EDPrelude.last: empty list"
+last [x] = x
+last (x:xs) = last xs
+
+tail :: [a] -> [a]
+tail [] = []
+tail (x:xs) = xs
+
+init :: [a] -> [a]
+init [] = []
+init [x] = []
+init (x:xs) = x : init xs
+
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr _ v [] = v
+foldr f v xs = f (head xs) (foldr f v (tail xs))
+
+foldl :: (a -> b -> a) -> a -> [b] -> a
+foldl _ v [] = v
+foldl f v xs = f (foldl f v (init xs)) (last xs)
+
+foldr1 :: (a -> a -> a) -> [a] -> a
+foldr1 _ [] = errorWithoutStackTrace "EDPrelude.foldr1: empty list"
+foldr1 _ [x] = x
+foldr1 f xs = f (head xs) (foldr1 f (tail xs))
+
+foldl1 :: (a -> a -> a) -> [a] -> a
+foldl1 _ [] = errorWithoutStackTrace "EDPrelude.foldl1: empty list"
+foldl1 _ [x] = x
+foldl1 f xs = f (foldl1 f (init xs)) (last xs)
 -- Undefined
+
+--Pretty-Printing
+print           :: Out a => a -> IO ()
+print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
+
+-- # Automatic Derivation of Out Instances from Show Instances
+instance {-# OVERLAPPABLE #-} (Show a) => Out (a) where
+    doc x = text (show x)
+    docPrec _ = doc

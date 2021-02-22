@@ -1,2 +1,2 @@
-:load /usr/local/var/edprelude/EDPrelude.hs
+:load /usr/local/share/edprelude/EDPrelude.hs
 -- :set +s

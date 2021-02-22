@@ -1,6 +1,6 @@
 module Tutorial1Completed where
 
-import EPrelude
+import EDPrelude
 import PicturesSVG -- needed for the optional chess part
 import Test.QuickCheck
 
