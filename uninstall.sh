@@ -1,5 +1,5 @@
 #!/bin/sh
-# A script for removing files corresponding to EPrelude from your system.
+# A script for removing files corresponding to EDPrelude from your system.
 
 if [ `whoami` != root ]; then
   echo This script needs to be run as sudo in order to uninstall correctly.
@@ -7,19 +7,19 @@ if [ `whoami` != root ]; then
 fi
 
 
-# EPrelude information is located in /usr/local/share/eprelude and /usr/local/bin/ehci
-#echo Deleting /usr/local/share/eprelude/Text/PrettyPrint/GenericPretty.hs...
-rm -f -i /usr/local/share/eprelude/Text/PrettyPrint/GenericPretty.hs
-#echo Deleting /usr/local/share/eprelude/Text/PrettyPrint...
-rm -d -f -i /usr/local/share/eprelude/Text/PrettyPrint
-#echo Deleting /usr/local/share/eprelude/Text...
-rm -d -f -i /usr/local/share/eprelude/Text
-#echo Deleting /usr/local/share/eprelude/.ghci
-rm -f -i /usr/local/share/eprelude/.ghci
-#echo Deleting /usr/local/share/eprelude/EPrelude.hs
-rm -f -i /usr/local/share/eprelude/EPrelude.hs
-#echo Deleting /usr/local/share/eprelude...
-rm -d -f -i /usr/local/share/eprelude
+# EDPrelude information is located in /usr/local/share/edprelude and /usr/local/bin/edhci
+#echo Deleting /usr/local/share/edprelude/Text/PrettyPrint/GenericPretty.hs...
+rm -f -i /usr/local/share/edprelude/Text/PrettyPrint/GenericPretty.hs
+#echo Deleting /usr/local/share/edprelude/Text/PrettyPrint...
+rm -d -f -i /usr/local/share/edprelude/Text/PrettyPrint
+#echo Deleting /usr/local/share/edprelude/Text...
+rm -d -f -i /usr/local/share/edprelude/Text
+#echo Deleting /usr/local/share/edprelude/.ghci
+rm -f -i /usr/local/share/edprelude/.ghci
+#echo Deleting /usr/local/share/edprelude/EDPrelude.hs
+rm -f -i /usr/local/share/edprelude/EDPrelude.hs
+#echo Deleting /usr/local/share/edprelude...
+rm -d -f -i /usr/local/share/edprelude
 #echo Deleting /usr/local/bin/edhci
 rm -f -i /usr/local/bin/edhci
 echo Uninstall Complete.

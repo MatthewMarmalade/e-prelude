@@ -11,7 +11,7 @@
 -- Maintainer  :  marslandm@me.com
 -- Status      :  work in progress
 --
--- The EPrelude: A version of Prelude built for students upwards in a flat file, supporting:
+-- The EDPrelude: A version of Prelude built for students upwards in a flat file, supporting:
 --  - Restricted Numeric Classes
 --  - Intelligible Function Signatures
 --  - Default Pretty-Printing
@@ -39,8 +39,8 @@ module EDPrelude (
     otherwise, (||), (&&),
 
     --Enum
-    GHC.Enum.Enum,
-    toEnum, fromEnum,
+    E.Enum,
+    EDPrelude.toEnum, EDPrelude.fromEnum,
 
     --List Types and Functions
     length, take, drop, sum, product, (!!), zip, zipWith, unzip, isPrefixOf, map, elem,
@@ -69,7 +69,7 @@ import GHC.Num
 import GHC.Real
 import Data.Eq
 import Data.Ord
-import qualified GHC.Enum (Enum,toEnum,fromEnum)
+import qualified GHC.Enum as E (Enum,toEnum,fromEnum)
 import Data.Char ()
 import GHC.Show
 import GHC.Types (Char, Bool(True,False), Double)
@@ -97,11 +97,11 @@ infixr 3 &&
 (&&) _ _        = False
 
 -- Enum Functions
-toEnum :: GHC.Enum.Enum a => Integer -> a
-toEnum i = GHC.Enum.toEnum (fromIntegral i)
+toEnum :: E.Enum a => Integer -> a
+toEnum i = E.toEnum (fromIntegral i)
 
-fromEnum :: GHC.Enum.Enum a => a -> Integer
-fromEnum x = toInteger (GHC.Enum.fromEnum x)
+fromEnum :: E.Enum a => a -> Integer
+fromEnum x = toInteger (E.fromEnum x)
 
 -- Char Functions
 isDigit :: Char -> Bool
