@@ -1,2 +1,2 @@
 #!/bin/sh
-ghci -ghci-script /usr/local/share/edprelude/.ghci -i/usr/local/share/edprelude -XDeriveGeneric -XDeriveAnyClass -XNoImplicitPrelude -interactive-print=print "$@"
+ghci -ignore-dot-ghci -ghci-script /usr/local/share/edprelude/.ghci -i/usr/local/share/edprelude -XDeriveGeneric -XDeriveAnyClass -XNoImplicitPrelude -interactive-print=print "$@"

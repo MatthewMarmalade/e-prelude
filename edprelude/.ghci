@@ -1,2 +1,3 @@
 :load /usr/local/share/edprelude/EDPrelude.hs
+--import qualified Prelude
 -- :set +s
