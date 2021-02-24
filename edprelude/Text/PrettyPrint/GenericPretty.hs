@@ -5,13 +5,13 @@
   GenericPretty is a Haskell library that supports automatic
   derivation of pretty printing functions on user defined data
   types.
-	
-	The output provided is a pretty printed version of that provided by
+  
+  The output provided is a pretty printed version of that provided by
   'Prelude.show'.  That is, rendering the document provided by this pretty
   printer yields an output identical to that of 'Prelude.show', except
   for extra whitespace.
-		
-	For examples of usage please see the README file included in the package.
+    
+  For examples of usage please see the README file included in the package.
   
   For more information see the HackageDB project page: <http://hackage.haskell.org/package/GenericPretty> 
 -}
@@ -138,7 +138,7 @@ wrapParens True s
 -- show the whole document in one line
 showDocOneLine :: Doc -> String
 showDocOneLine = fullRender OneLineMode 1 1 outputStr ""
-		
+    
 -- The types of data we need to consider for product operator. Record, Prefix and Infix.
 -- Tuples aren't considered since they're already instances of 'Out' and thus won't pass through that code.
 data Type = Rec | Pref | Inf String
@@ -147,15 +147,15 @@ data Type = Rec | Pref | Inf String
 -- so can't be an instance of 'Out'
 class GOut f where
   -- |'out1' is the (*->*) kind equivalent of 'docPrec'
-  out1 :: f x 	-- The sum of products representation of the user's custom type
-		  -> Type   -- The type of multiplication. Record, Prefix or Infix.
-		  -> Int    -- The operator precedence, determines wether to wrap stuff in parens.
-		  -> Bool   -- A flag, marks wether the constructor directly above was wrapped in parens.
+  out1 :: f x   -- The sum of products representation of the user's custom type
+      -> Type   -- The type of multiplication. Record, Prefix or Infix.
+      -> Int    -- The operator precedence, determines wether to wrap stuff in parens.
+      -> Bool   -- A flag, marks wether the constructor directly above was wrapped in parens.
                 -- Used to determine correct indentation
-		  -> [Doc]  -- The result. Each Doc could be on a newline, depending on available space.
+      -> [Doc]  -- The result. Each Doc could be on a newline, depending on available space.
   -- |'isNullary' marks nullary constructors, so that we don't put parens around them
   isNullary :: f x -> Bool
-  
+
 -- if empty, output nothing, this is a null constructor
 instance GOut U1 where
   out1 _ _ _ _ = [empty]
@@ -165,16 +165,16 @@ instance GOut U1 where
 instance (GOut f, Datatype c) => GOut (M1 D c f) where
   out1 (M1 a) = out1 a
   isNullary (M1 a) = isNullary a
-  
+
 -- if there is a selector, display it and it's value + appropriate white space
 instance (GOut f, Selector c) => GOut (M1 S c f) where
-  out1 s@(M1 a) t d p
-	| selector == "" = out1 a t d p
-	| otherwise = (text selector <+> char '='):map (nest $ length selector + 3) (out1 a t 0 p)
-	where
-		selector = selName s
-	
-  isNullary (M1 a) = isNullary a
+ out1 s@(M1 a) t d p
+  | selector == "" = out1 a t d p
+  | otherwise = (text selector <+> char '='):map (nest $ length selector + 3) (out1 a t 0 p)
+  where
+    selector = selName s
+  
+ isNullary (M1 a) = isNullary a
 
 -- constructor
 -- here the real type and parens flag is set and propagated forward via t and n, the precedence factor is updated
@@ -183,7 +183,7 @@ instance (GOut f, Constructor c) => GOut (M1 C c f) where
     case fixity of
       -- if prefix add the constructor name, nest the result and possibly put it in parens
       Prefix -> wrapParens boolParens $ text name: makeMargins t boolParens (out1 a t 11 boolParens)
-	  -- if infix possibly put in parens
+    -- if infix possibly put in parens
       Infix _ m -> wrapParens (d>m) $ out1 a t (m+1) (d>m)
       where 
         boolParens = d>10 && (not $ isNullary a)
@@ -201,7 +201,7 @@ instance (GOut f, Constructor c) => GOut (M1 C c f) where
         makeMargins Rec b s 
             | length s == 1 = [nest (length name + 1) (lbrace <> head s <> rbrace)]
             | otherwise = nest (length name + 1) (lbrace <> head s) : 
-							map (nest $ length name + 2) (middle s ++ [last s <> rbrace])
+              map (nest $ length name + 2) (middle s ++ [last s <> rbrace])
         makeMargins _ b s = map (nest $ length name + if b then 2 else 1) s
                 
         -- check for infix operators that are acting like prefix ones due to records, put them in parens
@@ -231,7 +231,7 @@ instance (GOut f, GOut g) => GOut (f :*: g) where
     where 
       pfn = out1 f t d p
       pgn = out1 g t d p
-	  
+    
   -- if infix, nest the second value since it isn't nested in the constructor    
   out1 (f :*: g) t@(Inf s) d p = init pfn ++ [last pfn <+> text s] ++ checkIndent pgn
     where
@@ -256,7 +256,7 @@ instance (GOut f, GOut g) => GOut (f :*: g) where
   out1 (f :*: g) t@Pref n p = out1 f t n p ++ out1 g t n p
   
   isNullary _ = False
-				
+        
 -- | 'fullPP' is a fully customizable Pretty Printer
 --
 -- Every other pretty printer just gives some default values to 'fullPP' 
@@ -369,7 +369,7 @@ instance Out Char where
   doc a = char '\'' <> (text.middle.show $ a) <> char '\''
   docPrec _ = doc
   docList xs = text $ show xs
-  			
+        
 instance Out Int where
   docPrec n x
       | n/=0 && x<0 = parens $ int x
@@ -412,29 +412,29 @@ instance Out Bool where
 instance Out a => Out (Maybe a) where
   docPrec n Nothing = text "Nothing"
   docPrec n (Just x)
-	| n/=0 = parens result
-	|otherwise = result
-	  where
-		result = text "Just" <+> docPrec 10 x
+   | n/=0 = parens result
+   |otherwise = result
+    where
+    result = text "Just" <+> docPrec 10 x
   doc = docPrec 0
 
 instance (Out a, Out b) => Out (Either a b) where
   docPrec n (Left x)
-	| n/=0 = parens result
-	| otherwise = result
-	  where
-		result = text "Left"  <+> docPrec 10 x
+   | n/=0 = parens result
+   | otherwise = result
+    where
+    result = text "Left"  <+> docPrec 10 x
   docPrec n (Right y)
-	| n/=0 = parens result
-	| otherwise = result
-	  where
-		result = text "Right" <+> docPrec 10 y
+   | n/=0 = parens result
+   | otherwise = result
+    where
+    result = text "Right" <+> docPrec 10 y
   doc = docPrec 0
 
 instance (Out a, Out b) => Out (a, b) where
     doc (a,b) = parens (sep [doc a <> comma, doc b])
     docPrec _ = doc
-	
+  
 instance (Out a, Out b, Out c) => Out (a, b, c) where
     doc (a,b,c) = parens (sep [doc a <> comma, doc b <> comma, doc c])
     docPrec _ = doc
@@ -443,19 +443,19 @@ instance (Out a, Out b, Out c, Out d) => Out (a, b, c, d) where
     doc (a,b,c,d) = parens (sep [doc a <> comma, doc b <> comma, doc c <> comma, doc d])
     docPrec _ = doc
 
-instance (Out a, Out b, Out c, Out d, Out e) =>	 Out (a, b, c, d, e) where
+instance (Out a, Out b, Out c, Out d, Out e) =>  Out (a, b, c, d, e) where
     doc (a,b,c,d,e) = parens (sep [doc a <> comma, doc b <> comma, doc c <> comma, doc d <> comma, doc e])
     docPrec _ = doc
 
 instance (Out a, Out b, Out c, Out d, Out e, Out f) 
-	=> Out (a, b, c, d, e, f) where
+  => Out (a, b, c, d, e, f) where
       doc (a, b, c, d, e, f) = 
         parens (sep [ doc a <> comma, doc b <> comma, doc c <> comma, 
                       doc d <> comma, doc e <> comma, doc f])
       docPrec _ = doc
       
 instance (Out a, Out b, Out c, Out d, Out e, Out f, Out g) 
-	=> Out (a, b, c, d, e, f, g) where
+  => Out (a, b, c, d, e, f, g) where
       doc (a, b, c, d, e, f, g) = 
         parens (sep [ doc a <> comma, doc b <> comma, doc c <> comma, 
                       doc d <> comma, doc e <> comma, doc f <> comma, doc g])
