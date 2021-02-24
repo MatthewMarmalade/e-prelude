@@ -18,7 +18,7 @@
 
 module PicturesSVG where
 
-import EDPrelude
+import EdPrelude
 import System.IO ( hClose, openFile, hPutStrLn, IOMode(WriteMode) )
 import Control.Monad (liftM, liftM2)
 import Data.Set (Set, fromList)

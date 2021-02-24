@@ -4,20 +4,20 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 -----------------------------------------------------------
--- Module      :  EPrelude
+-- Module      :  EdPrelude
 -- Copyright   :  (c) Matthew Marsland
 -- License     :  BSD-style
 --
 -- Maintainer  :  marslandm@me.com
 -- Status      :  work in progress
 --
--- The EDPrelude: A version of Prelude built for students upwards in a flat file, supporting:
+-- The EdPrelude: A version of Prelude built for students upwards in a flat file, supporting:
 --  - Restricted Numeric Classes
 --  - Intelligible Function Signatures
 --  - Default Pretty-Printing
 -----------------------------------------------------------
 
-module EDPrelude (
+module EdPrelude (
     --EXPORT LIST
     --Numeric Types and Functions
     Num((+),(-),(*),negate,abs,signum,fromInteger),
@@ -40,7 +40,7 @@ module EDPrelude (
 
     --Enum
     E.Enum,
-    EDPrelude.toEnum, EDPrelude.fromEnum,
+    EdPrelude.toEnum, EdPrelude.fromEnum,
 
     --List Types and Functions
     length, take, drop, sum, product, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),

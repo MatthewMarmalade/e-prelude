@@ -1,6 +1,6 @@
 module Tutorial2 where
 
-import EPrelude
+import EdPrelude
 --import Data.Char
 --import Data.List
 --import Test.QuickCheck

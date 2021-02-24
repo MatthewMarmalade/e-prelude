@@ -16,8 +16,8 @@ rm -d -f -i /usr/local/share/edprelude/Text/PrettyPrint
 rm -d -f -i /usr/local/share/edprelude/Text
 #echo Deleting /usr/local/share/edprelude/.ghci
 rm -f -i /usr/local/share/edprelude/.ghci
-#echo Deleting /usr/local/share/edprelude/EDPrelude.hs
-rm -f -i /usr/local/share/edprelude/EDPrelude.hs
+#echo Deleting /usr/local/share/edprelude/EdPrelude.hs
+rm -f -i /usr/local/share/edprelude/EdPrelude.hs
 #echo Deleting /usr/local/share/edprelude...
 rm -d -f -i /usr/local/share/edprelude
 #echo Deleting /usr/local/bin/edhci
