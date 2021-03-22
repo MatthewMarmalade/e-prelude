@@ -14,7 +14,6 @@
 -- The EdPrelude: A version of Prelude built for students upwards in a flat file, supporting:
 --  - Restricted Numeric Classes
 --  - Intelligible Function Signatures
---  - Default Pretty-Printing
 -----------------------------------------------------------
 
 module EdPrelude (
@@ -43,33 +42,39 @@ module EdPrelude (
     EdPrelude.toEnum, EdPrelude.fromEnum,
 
     --List Types and Functions
-    length, take, drop, sum, product, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),
-    repeat, replicate, head, tail, init, last, concat,
+    length, take, drop, takeWhile, dropWhile, sum, product, and, or, all, any, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),
+    repeat, replicate, head, tail, init, last, concat, delete, maximum, minimum, reverse, filter, curry, uncurry, intersperse,
+    sort, sortOn, sortBy, nub, nubBy, unlines, lines, unwords, words, concatMap,
     foldr, foldr1, foldl, foldl1,
     --Pair Functions
     fst, snd,
 
     --Char Types and Functions
-    isDigit, isUpper, isLower, isAlpha, isAlphaNum, toUpper, toLower, digitToInteger, integerToDigit,
+    isDigit, isUpper, isLower, isAlpha, isAlphaNum, toUpper, toLower, digitToInteger, integerToDigit, chr, ord,
 
     --Showing as Strings, Characters, and Strings
     Show(..),
     Char, String,
 
     --Miscellaneous
-    undefined, error, errorWithoutStackTrace, ($), (.),
+    undefined, error, errorWithoutStackTrace, ($), (.), seq, sequence,
 
     --Lifting and Monads
-    Monad,
+    Monad, Applicative,
     (>>=), guard, return,
-    liftM, liftM2,
+    liftM, liftM2, replicateM,
+    Maybe,
 
     --IO
     IO,
+    putStr, readFile,
+
+    --Random
+    randomR, randomRIO
 
     --Pretty-Printing
-    Generic, Out,
-    pp, print
+    --Generic, Out,
+    --pp, print
     ) where
 
 --IMPORTS
@@ -79,14 +84,19 @@ import GHC.Real
 import Data.Eq
 import Data.Ord
 import qualified GHC.Enum as E (Enum,toEnum,fromEnum)
-import Data.Char ()
+import qualified Data.Char as C (ord,chr)
+import Data.List (sort,sortOn,sortBy,nubBy)
 import GHC.Show
 import GHC.Types (Char, Bool(True,False), Double)
-import GHC.Base (String, error, errorWithoutStackTrace, ($), (.), undefined)
+import GHC.Base (String, error, errorWithoutStackTrace, ($), (.), undefined, seq, sequence)
+import Data.Maybe
 import Control.Monad (Monad, liftM, liftM2, (>>=), guard, return)
-import System.IO (IO)
-import Text.PrettyPrint
-import Text.PrettyPrint.GenericPretty
+import Control.Applicative (Applicative)
+import qualified Control.Monad as M (replicateM)
+import System.IO (IO, putStr, readFile)
+import System.Random (randomR, randomRIO)
+--import Text.PrettyPrint
+--import Text.PrettyPrint.GenericPretty
 
 -- Num Functions
 
@@ -151,6 +161,12 @@ integerToDigit i
     | i >= 0 && i <= 9 = toEnum (i + fromEnum '0')
     | otherwise = errorWithoutStackTrace "Char.integerToDigit: not a digit."
 
+ord :: Char -> Integer
+ord c = fromEnum c
+
+chr :: Integer -> Char
+chr i = toEnum i
+
 -- List Functions
 (++) :: [a] -> [a] -> [a]
 (++) [] y = y
@@ -165,10 +181,25 @@ take n [] = []
 take 0 (x:xs) = []
 take n (x:xs) = x : take (n-1) xs
 
+takeWhile :: (a -> Bool) -> [a] -> [a]
+takeWhile _ [] = []
+takeWhile f (x:xs)  | f x = x : takeWhile f xs
+                    | otherwise = []
+
 drop :: Integer -> [a] -> [a]
 drop n [] = []
 drop 0 xs = xs
 drop n (x:xs) = drop (n-1) xs
+
+dropWhile :: (a -> Bool) -> [a] -> [a]
+dropWhile _ [] = []
+dropWhile f (x:xs)  | f x = dropWhile f xs
+                    | otherwise = (x:xs)
+
+delete :: Eq a => a -> [a] -> [a]
+delete _ [] = []
+delete a (x:xs) | a == x = xs
+                | otherwise = x : delete a xs
 
 sum :: Num a => [a] -> a
 sum [] = 0
@@ -178,16 +209,52 @@ product :: Num a => [a] -> a
 product [] = 1
 product (x:xs) = x * product xs
 
+and :: [Bool] -> Bool
+and [] = True
+and (b:bs) = b && (and bs)
+
+or :: [Bool] -> Bool
+or [] = False
+or (b:bs) = b || (or bs)
+
+all :: (a -> Bool) -> [a] -> Bool
+all f xs = and (map f xs)
+
+any :: (a -> Bool) -> [a] -> Bool
+any f xs = or (map f xs)
+
+maximum :: (Ord a) => [a] -> a
+maximum [] = errorWithoutStackTrace "EdPrelude.maximum: empty list"
+maximum [x] = x
+maximum (x:xs) = max x (maximum xs)
+
+minimum :: (Ord a) => [a] -> a
+minimum [] = errorWithoutStackTrace "EdPrelude.minimum: empty list"
+minimum [x] = x
+minimum (x:xs) = min x (minimum xs)
+
+reverse :: [a] -> [a]
+reverse [] = []
+reverse (x:xs) = (reverse xs) ++ [x]
+
 infixl 9 !!
 (!!) :: [a] -> Integer -> a
-xs     !! n | n < 0 =  errorWithoutStackTrace "EDPrelude.!!: negative index"
-[]     !! _         =  errorWithoutStackTrace "EDPrelude.!!: index too large"
+xs     !! n | n < 0 =  errorWithoutStackTrace "EdPrelude.!!: negative index"
+[]     !! _         =  errorWithoutStackTrace "EdPrelude.!!: index too large"
 (x:_)  !! 0         =  x
 (_:xs) !! n         =  xs !! (n-1)
 
 map :: (a -> b) -> [a] -> [b]
 map _ [] = []
 map f (a:as) = (f a) : (map f as)
+
+filter :: (a -> Bool) -> [a] -> [a]
+filter _ [] = []
+filter f (a:as) | f a = a : filter f as
+                | otherwise = filter f as
+
+concatMap :: (a -> [b]) -> [a] -> [b]
+concatMap f as = concat (map f as)
 
 fst :: (a,b) -> a
 fst (a,b) = a
@@ -211,6 +278,12 @@ unzip abs = (as, bs)
         as = map fst abs
         bs = map snd abs
 
+curry :: ((a, b) -> c) -> a -> b -> c
+curry f x y = f (x,y)
+
+uncurry :: (a -> b -> c) -> (a,b) -> c
+uncurry f (x,y) = f x y
+
 isPrefixOf :: (Eq a) => [a] -> [a] -> Bool
 isPrefixOf [] _ = True
 isPrefixOf _ [] = False
@@ -220,22 +293,51 @@ elem :: (Eq a) => a -> [a] -> Bool
 elem x [] = False
 elem x (y:ys) = x == y || elem x ys
 
+nub :: (Eq a) => [a] -> [a]
+nub xs = reverse (nubHelp [] xs) where
+    nubHelp seen [] = seen
+    nubHelp seen (u:unseen) | u `elem` seen = nubHelp seen unseen
+                            | otherwise = nubHelp (u:seen) unseen
+
 repeat :: a -> [a]
 repeat x = x : (repeat x)
 
 replicate :: Integer -> a -> [a]
 replicate n x = take n (repeat x)
 
+intersperse :: a -> [a] -> [a]
+intersperse _ [] = []
+intersperse a [x] = [x]
+intersperse a (x:xs) = x : a : intersperse a xs
+
+words :: String -> [String]
+words [] = []
+words s = (takeWhile (/= ' ') s) : words (drop 1 (dropWhile (/= ' ') s))
+
+lines :: String -> [String]
+lines [] = []
+lines s = (takeWhile (/= '\n') s) : lines (drop 1 (dropWhile (/= '\n') s))
+
+unwords :: [String] -> String
+unwords [] = ""
+unwords [x] = x
+unwords (w:ws) = w ++ [' '] ++ unwords ws
+
+unlines :: [String] -> String
+unlines [] = ""
+unlines [x] = x
+unlines (l:ls) = l ++ ['\n'] ++ unlines ls
+
 concat :: [[a]] -> [a]
 concat [] = []
 concat (xs:xss) = xs ++ concat xss
 
 head :: [a] -> a
-head [] = errorWithoutStackTrace "EDPrelude.head: empty list"
+head [] = errorWithoutStackTrace "EdPrelude.head: empty list"
 head (x:xs) = x
 
 last :: [a] -> a
-last [] = errorWithoutStackTrace "EDPrelude.last: empty list"
+last [] = errorWithoutStackTrace "EdPrelude.last: empty list"
 last [x] = x
 last (x:xs) = last xs
 
@@ -248,6 +350,10 @@ init [] = []
 init [x] = []
 init (x:xs) = x : init xs
 
+transpose :: [[a]] -> [[a]]
+transpose [] = []
+transpose xs = (concatMap (take 1) xs) : transpose (filter (\x -> length x > 0) (map (drop 1) xs))
+
 foldr :: (a -> b -> b) -> b -> [a] -> b
 foldr _ v [] = v
 foldr f v xs = f (head xs) (foldr f v (tail xs))
@@ -257,21 +363,31 @@ foldl _ v [] = v
 foldl f v xs = f (foldl f v (init xs)) (last xs)
 
 foldr1 :: (a -> a -> a) -> [a] -> a
-foldr1 _ [] = errorWithoutStackTrace "EDPrelude.foldr1: empty list"
+foldr1 _ [] = errorWithoutStackTrace "EdPrelude.foldr1: empty list"
 foldr1 _ [x] = x
 foldr1 f xs = f (head xs) (foldr1 f (tail xs))
 
 foldl1 :: (a -> a -> a) -> [a] -> a
-foldl1 _ [] = errorWithoutStackTrace "EDPrelude.foldl1: empty list"
+foldl1 _ [] = errorWithoutStackTrace "EdPrelude.foldl1: empty list"
 foldl1 _ [x] = x
 foldl1 f xs = f (foldl1 f (init xs)) (last xs)
 -- Undefined
 
+--Monads
+replicateM :: Applicative m => Integer -> m a -> m [a]
+replicateM i m = M.replicateM (fromIntegral i) m
+
+--Miscellaneous
+id :: a -> a
+id a = a
+
 --Pretty-Printing
-print           :: Out a => a -> IO ()
-print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
+
+--print           :: Out a => a -> IO ()
+--print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
 
 -- # Automatic Derivation of Out Instances from Show Instances
-instance {-# OVERLAPPABLE #-} (Show a) => Out (a) where
-    doc x = text (show x)
-    docPrec _ = doc
+--instance {-# OVERLAPPABLE #-} (Show a) => Out (a) where
+--    doc x = text (show x)
+--    docPrec _ = doc
+
