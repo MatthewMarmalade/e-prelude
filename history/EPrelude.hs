@@ -363,6 +363,6 @@ print           :: Out a => a -> IO ()
 print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
 
 -- # Automatic Derivation of Out Instances from Show Instances
-instance {-# OVERLAPPABLE #-} (Show a) => Out (a) where
-    doc x = text (show x)
-    docPrec _ = doc
+--instance {-{-# OVERLAPPABLE #-}-} (Show a) => Out (a) where
+--    doc x = text (show x)
+--    docPrec _ = doc

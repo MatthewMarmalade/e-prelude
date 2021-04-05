@@ -25,6 +25,7 @@ module EdPrelude (
     RealFrac(truncate,round,ceiling,floor),
     Integral(quot, rem, div, mod, quotRem, divMod, toInteger),
     Integer, Double, Rational,
+    numerator, denominator,
     (%), (^), (^^),
     even, odd,
 
@@ -42,12 +43,13 @@ module EdPrelude (
     EdPrelude.toEnum, EdPrelude.fromEnum,
 
     --List Types and Functions
-    length, take, drop, takeWhile, dropWhile, sum, product, and, or, all, any, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),
-    repeat, replicate, head, tail, init, last, concat, delete, maximum, minimum, reverse, filter, curry, uncurry, intersperse,
-    sort, sortOn, sortBy, nub, nubBy, unlines, lines, unwords, words, concatMap,
+    length, genericLength, take, drop, takeWhile, dropWhile, sum, product, and, or, all, any, (!!), zip, zipWith, unzip, isPrefixOf, map, elem, (++),
+    repeat, replicate, cycle, head, tail, init, last, concat, delete, maximum, minimum, reverse, filter,
+    sort, sortOn, sortBy, nub, nubBy, unlines, lines, unwords, words, concatMap, null, lookup, transpose,
     foldr, foldr1, foldl, foldl1,
-    --Pair Functions
-    fst, snd,
+    (\\),
+    --Tuple Functions
+    fst, snd, curry, uncurry,
 
     --Char Types and Functions
     isDigit, isUpper, isLower, isAlpha, isAlphaNum, toUpper, toLower, digitToInteger, integerToDigit, chr, ord,
@@ -57,20 +59,21 @@ module EdPrelude (
     Char, String,
 
     --Miscellaneous
-    undefined, error, errorWithoutStackTrace, ($), (.), seq, sequence,
+    undefined, error, errorWithoutStackTrace, ($), (.), seq, sequence_, sequence, id, break,
 
     --Lifting and Monads
     Monad, Applicative,
-    (>>=), guard, return,
+    (>>=), (>>), guard, return,
     liftM, liftM2, replicateM,
-    Maybe,
+    Maybe(Just, Nothing),
+    Functor, (<$>),
 
     --IO
     IO,
-    putStr, readFile,
+    putStr, putStrLn, readFile,
 
     --Random
-    randomR, randomRIO
+    randomR, randomRIO, newStdGen
 
     --Pretty-Printing
     --Generic, Out,
@@ -85,16 +88,18 @@ import Data.Eq
 import Data.Ord
 import qualified GHC.Enum as E (Enum,toEnum,fromEnum)
 import qualified Data.Char as C (ord,chr)
-import Data.List (sort,sortOn,sortBy,nubBy)
+import Data.List (sort,sortOn,sortBy,nubBy,lookup,genericLength,(\\))
 import GHC.Show
-import GHC.Types (Char, Bool(True,False), Double)
-import GHC.Base (String, error, errorWithoutStackTrace, ($), (.), undefined, seq, sequence)
-import Data.Maybe
-import Control.Monad (Monad, liftM, liftM2, (>>=), guard, return)
+import GHC.Types (Char,Bool(True,False),Double)
+import GHC.Base (String,error,errorWithoutStackTrace,($),(.),undefined,seq,id)
+import Data.Maybe (Maybe(Just,Nothing))
+--import Control.Functor (Functor, (<$>))
+import Prelude (Functor,(<$>),sequence_,sequence,cycle,break)
+import Control.Monad (Monad,liftM,liftM2,(>>=),(>>),guard,return)
 import Control.Applicative (Applicative)
 import qualified Control.Monad as M (replicateM)
-import System.IO (IO, putStr, readFile)
-import System.Random (randomR, randomRIO)
+import System.IO (IO,putStr,putStrLn,readFile)
+import System.Random (randomR,randomRIO,newStdGen)
 --import Text.PrettyPrint
 --import Text.PrettyPrint.GenericPretty
 
@@ -299,16 +304,15 @@ nub xs = reverse (nubHelp [] xs) where
     nubHelp seen (u:unseen) | u `elem` seen = nubHelp seen unseen
                             | otherwise = nubHelp (u:seen) unseen
 
+null :: [a] -> Bool
+null [] = True
+null xs = False
+
 repeat :: a -> [a]
 repeat x = x : (repeat x)
 
 replicate :: Integer -> a -> [a]
 replicate n x = take n (repeat x)
-
-intersperse :: a -> [a] -> [a]
-intersperse _ [] = []
-intersperse a [x] = [x]
-intersperse a (x:xs) = x : a : intersperse a xs
 
 words :: String -> [String]
 words [] = []
@@ -371,15 +375,12 @@ foldl1 :: (a -> a -> a) -> [a] -> a
 foldl1 _ [] = errorWithoutStackTrace "EdPrelude.foldl1: empty list"
 foldl1 _ [x] = x
 foldl1 f xs = f (foldl1 f (init xs)) (last xs)
+
 -- Undefined
 
 --Monads
 replicateM :: Applicative m => Integer -> m a -> m [a]
 replicateM i m = M.replicateM (fromIntegral i) m
-
---Miscellaneous
-id :: a -> a
-id a = a
 
 --Pretty-Printing
 
