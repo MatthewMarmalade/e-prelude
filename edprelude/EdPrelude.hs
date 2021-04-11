@@ -2,6 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 
 -----------------------------------------------------------
 -- Module      :  EdPrelude
@@ -81,14 +82,18 @@ module EdPrelude (
     ) where
 
 --IMPORTS
---import GHC.Integer (Integer, plusInteger, minusInteger, timesInteger, negateInteger, absInteger, signumInteger)
 import GHC.Num
 import GHC.Real
 import Data.Eq
 import Data.Ord
+import Data.Bool (otherwise, not, (||), (&&), Bool(True, False))
+import Data.Char (isDigit, isUpper, isLower, isAlpha, isAlphaNum)
 import qualified GHC.Enum as E (Enum,toEnum,fromEnum)
 import qualified Data.Char as C (ord,chr)
-import Data.List (sort,sortOn,sortBy,nubBy,lookup,genericLength,(\\))
+import Data.List ((++),takeWhile,dropWhile,delete,reverse,map,filter,zip,unzip,zipWith,
+                  isPrefixOf,head,tail,init,last,concat,words,unwords,lines,unlines,
+                  repeat,replicate,sort,sortOn,sortBy,nubBy,lookup,genericLength,(\\))
+import Data.Tuple (fst, snd, curry, uncurry)
 import GHC.Show
 import GHC.Types (Char,Bool(True,False),Double)
 import GHC.Base (String,error,errorWithoutStackTrace,($),(.),undefined,seq,id)
@@ -100,28 +105,8 @@ import Control.Applicative (Applicative)
 import qualified Control.Monad as M (replicateM)
 import System.IO (IO,putStr,putStrLn,readFile)
 import System.Random (randomR,randomRIO,newStdGen)
---import Text.PrettyPrint
---import Text.PrettyPrint.GenericPretty
-
--- Num Functions
-
--- Bool Functions
-otherwise :: Bool
-otherwise = True
-
-not :: Bool -> Bool
-not True = False
-not False = True
-
-infixr 2 ||
-(||) :: Bool -> Bool -> Bool
-(||) False False    = False
-(||) _ _            = True
-
-infixr 3 &&
-(&&) :: Bool -> Bool -> Bool
-(&&) True True  = True
-(&&) _ _        = False
+import Text.PrettyPrint
+import Text.PrettyPrint.GenericPretty
 
 -- Enum Functions
 toEnum :: E.Enum a => Integer -> a
@@ -131,20 +116,6 @@ fromEnum :: E.Enum a => a -> Integer
 fromEnum x = toInteger (E.fromEnum x)
 
 -- Char Functions
-isDigit :: Char -> Bool
-isDigit c = c >= '0' && c <= '9'
-
-isUpper :: Char -> Bool
-isUpper c = c >= 'A' && c <= 'Z'
-
-isLower :: Char -> Bool
-isLower c = c >= 'a' && c <= 'z'
-
-isAlpha :: Char -> Bool
-isAlpha c = isUpper c || isLower c
-
-isAlphaNum :: Char -> Bool
-isAlphaNum c = isAlpha c || isDigit c
 
 toUpper :: Char -> Char
 toUpper c
@@ -173,9 +144,6 @@ chr :: Integer -> Char
 chr i = toEnum i
 
 -- List Functions
-(++) :: [a] -> [a] -> [a]
-(++) [] y = y
-(++) (x:xs) y = x : (++) xs y
 
 length :: [a] -> Integer
 length [] = 0
@@ -186,25 +154,10 @@ take n [] = []
 take 0 (x:xs) = []
 take n (x:xs) = x : take (n-1) xs
 
-takeWhile :: (a -> Bool) -> [a] -> [a]
-takeWhile _ [] = []
-takeWhile f (x:xs)  | f x = x : takeWhile f xs
-                    | otherwise = []
-
 drop :: Integer -> [a] -> [a]
 drop n [] = []
 drop 0 xs = xs
 drop n (x:xs) = drop (n-1) xs
-
-dropWhile :: (a -> Bool) -> [a] -> [a]
-dropWhile _ [] = []
-dropWhile f (x:xs)  | f x = dropWhile f xs
-                    | otherwise = (x:xs)
-
-delete :: Eq a => a -> [a] -> [a]
-delete _ [] = []
-delete a (x:xs) | a == x = xs
-                | otherwise = x : delete a xs
 
 sum :: Num a => [a] -> a
 sum [] = 0
@@ -238,10 +191,6 @@ minimum [] = errorWithoutStackTrace "EdPrelude.minimum: empty list"
 minimum [x] = x
 minimum (x:xs) = min x (minimum xs)
 
-reverse :: [a] -> [a]
-reverse [] = []
-reverse (x:xs) = (reverse xs) ++ [x]
-
 infixl 9 !!
 (!!) :: [a] -> Integer -> a
 xs     !! n | n < 0 =  errorWithoutStackTrace "EdPrelude.!!: negative index"
@@ -249,18 +198,10 @@ xs     !! n | n < 0 =  errorWithoutStackTrace "EdPrelude.!!: negative index"
 (x:_)  !! 0         =  x
 (_:xs) !! n         =  xs !! (n-1)
 
-map :: (a -> b) -> [a] -> [b]
-map _ [] = []
-map f (a:as) = (f a) : (map f as)
-
-filter :: (a -> Bool) -> [a] -> [a]
-filter _ [] = []
-filter f (a:as) | f a = a : filter f as
-                | otherwise = filter f as
-
 concatMap :: (a -> [b]) -> [a] -> [b]
 concatMap f as = concat (map f as)
 
+{-
 fst :: (a,b) -> a
 fst (a,b) = a
 
@@ -293,6 +234,7 @@ isPrefixOf :: (Eq a) => [a] -> [a] -> Bool
 isPrefixOf [] _ = True
 isPrefixOf _ [] = False
 isPrefixOf (x:xs) (y:ys) = x == y && isPrefixOf xs ys
+-}
 
 elem :: (Eq a) => a -> [a] -> Bool
 elem x [] = False
@@ -308,6 +250,7 @@ null :: [a] -> Bool
 null [] = True
 null xs = False
 
+{-
 repeat :: a -> [a]
 repeat x = x : (repeat x)
 
@@ -332,6 +275,7 @@ unlines [] = ""
 unlines [x] = x
 unlines (l:ls) = l ++ ['\n'] ++ unlines ls
 
+
 concat :: [[a]] -> [a]
 concat [] = []
 concat (xs:xss) = xs ++ concat xss
@@ -353,6 +297,8 @@ init :: [a] -> [a]
 init [] = []
 init [x] = []
 init (x:xs) = x : init xs
+
+-}
 
 transpose :: [[a]] -> [[a]]
 transpose [] = []
@@ -384,11 +330,11 @@ replicateM i m = M.replicateM (fromIntegral i) m
 
 --Pretty-Printing
 
---print           :: Out a => a -> IO ()
---print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
+print           :: Out a => a -> IO ()
+print x         =  ppStyle (Style {mode = PageMode, lineLength = 80, ribbonsPerLine = 2}) x
 
 -- # Automatic Derivation of Out Instances from Show Instances
---instance {-# OVERLAPPABLE #-} (Show a) => Out (a) where
---    doc x = text (show x)
---    docPrec _ = doc
+instance {-# OVERLAPPABLE #-} Show a => Out a where
+    doc x = text (show x)
+    docPrec _ x = doc x
 

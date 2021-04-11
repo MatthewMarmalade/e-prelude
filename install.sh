@@ -6,6 +6,11 @@ if [ `whoami` != root ]; then
   exit
 fi
 
+# Install GenericPretty Through Cabal
+echo Installing GenericPretty Dependency...
+cabal update
+cabal install GenericPretty
+
 # EDPrelude information is located in /usr/local/share/edprelude
 [ -d /usr/local/share ] || mkdir -p /usr/local/share
 
